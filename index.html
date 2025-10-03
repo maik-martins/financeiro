@@ -1,735 +1,414 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planilha Financeira - Fechamento Diário</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7f9;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .description {
-            color: #7f8c8d;
-            font-size: 16px;
-        }
-        
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-            text-align: center;
-            border-left: 4px solid #3498db;
-        }
-        
-        .card.receitas {
-            border-left-color: #2ecc71;
-        }
-        
-        .card.despesas {
-            border-left-color: #e74c3c;
-        }
-        
-        .card.saldo {
-            border-left-color: #9b59b6;
-        }
-        
-        .card h3 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-        
-        .valor {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        
-        .positivo {
-            color: #2ecc71;
-        }
-        
-        .negativo {
-            color: #e74c3c;
-        }
-        
-        .panel {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-        }
-        
-        .panel h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        input, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            transition: border 0.3s;
-        }
-        
-        input:focus, select:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-        }
-        
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-        
-        button:hover {
-            background-color: #2980b9;
-        }
-        
-        .btn-adicionar {
-            background-color: #2ecc71;
-        }
-        
-        .btn-adicionar:hover {
-            background-color: #27ae60;
-        }
-        
-        .btn-excluir {
-            background-color: #e74c3c;
-            padding: 8px 12px;
-            font-size: 14px;
-        }
-        
-        .btn-excluir:hover {
-            background-color: #c0392b;
-        }
-        
-        .btn-fechamento {
-            background-color: #9b59b6;
-        }
-        
-        .btn-fechamento:hover {
-            background-color: #8e44ad;
-        }
-        
-        .filtros {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-        
-        th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        tr:hover {
-            background-color: #f5f7f9;
-        }
-        
-        .acoes {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .resumo-mensal {
-            margin-top: 30px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            color: #7f8c8d;
-        }
-        
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .filtros {
-                grid-template-columns: 1fr;
-            }
-            
-            .acoes {
-                flex-direction: column;
-            }
-            
-            table {
-                display: block;
-                overflow-x: auto;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planilha Financeira - Fechamento Diário e Mensal</title>
+  <style>
+    /* ---------- Reset / Base ---------- */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f5f7f9; color: #333; padding: 24px; }
+    .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
+
+    /* ---------- Header ---------- */
+    header { text-align: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+    header h1 { color: #2c3e50; font-size: 24px; margin-bottom: 6px; }
+    .description { color: #7f8c8d; }
+
+    /* ---------- Dashboard ---------- */
+    .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin: 20px 0; }
+    .card { background: linear-gradient(180deg,#fff,#fafbfd); padding: 18px; border-radius: 10px; border-left: 6px solid #3498db; box-shadow: 0 6px 18px rgba(0,0,0,0.03); }
+    .card h3 { font-size: 16px; color: #2c3e50; margin-bottom: 8px; }
+    .valor { font-size: 22px; font-weight: 700; }
+    .card.receitas { border-left-color: #2ecc71; }
+    .card.despesas { border-left-color: #e74c3c; }
+    .card.saldo { border-left-color: #9b59b6; }
+
+    .positivo { color: #2ecc71; }
+    .negativo { color: #e74c3c; }
+
+    /* ---------- Panels / Forms ---------- */
+    .panel { background: #f8f9fa; padding: 18px; border-radius: 10px; margin-bottom: 18px; }
+    .panel h2 { color: #2c3e50; margin-bottom: 14px; font-size: 18px; }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 12px; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; color: #2c3e50; }
+    input[type="text"], input[type="date"], input[type="number"], select { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; background: #fff; }
+    input:focus, select:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 4px rgba(52,152,219,0.07); }
+
+    button { background-color: #3498db; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+    button:hover { filter: brightness(0.95); }
+    .btn-adicionar { background-color: #2ecc71; }
+    .btn-adicionar:hover { filter: brightness(0.95); }
+    .btn-excluir { background-color: #e74c3c; padding: 6px 10px; border-radius: 6px; font-size: 14px; }
+    .btn-fechamento { background-color: #9b59b6; }
+
+    /* ---------- Filtros ---------- */
+    .filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
+
+    /* ---------- Table ---------- */
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.03); }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #f1f3f5; font-size: 14px; }
+    th { background: #f8f9fa; font-weight: 700; color: #2c3e50; }
+    tr:hover td { background: #fbfcfd; }
+
+    .acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+    /* ---------- Resumo Mensal ---------- */
+    .resumo-mensal { margin-top: 22px; padding: 14px; background: #fff; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.03); }
+    .resumo-mensal h2 { margin-bottom: 12px; }
+
+    /* ---------- Empty State ---------- */
+    .empty-state { text-align: center; padding: 28px; color: #7f8c8d; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      .dashboard { grid-template-columns: 1fr; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Planilha Financeira com Fechamento Diário</h1>
-            <p class="description">Controle suas finanças com registro diário e exclusão de lançamentos incorretos</p>
-        </header>
-        
-        <div class="dashboard">
-            <div class="card receitas">
-                <h3>Total de Receitas</h3>
-                <div class="valor positivo" id="total-receitas">R$ 0,00</div>
-                <p>Hoje: <span id="receitas-hoje" class="positivo">R$ 0,00</span></p>
-            </div>
-            
-            <div class="card despesas">
-                <h3>Total de Despesas</h3>
-                <div class="valor negativo" id="total-despesas">R$ 0,00</div>
-                <p>Hoje: <span id="despesas-hoje" class="negativo">R$ 0,00</span></p>
-            </div>
-            
-            <div class="card saldo">
-                <h3>Saldo do Caixa</h3>
-                <div class="valor" id="saldo-caixa">R$ 0,00</div>
-                <p>Saldo do dia: <span id="saldo-diario">R$ 0,00</span></p>
-            </div>
-        </div>
-        
-        <div class="panel">
-            <h2>Registrar Nova Transação</h2>
-            <form id="form-transacao">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="data">Data:</label>
-                        <input type="date" id="data" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="descricao">Descrição:</label>
-                        <input type="text" id="descricao" placeholder="Ex: Venda de produtos" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="categoria">Categoria:</label>
-                        <select id="categoria" required>
-                            <option value="">Selecione uma categoria</option>
-                            <optgroup label="Receitas">
-                                <option value="vendas">Vendas</option>
-                                <option value="servicos">Serviços</option>
-                                <option value="outras_receitas">Outras Receitas</option>
-                            </optgroup>
-                            <optgroup label="Despesas">
-                                <option value="fornecedores">Fornecedores</option>
-                                <option value="funcionarios">Funcionários</option>
-                                <option value="impostos">Impostos</option>
-                                <option value="manutencao">Manutenção</option>
-                                <option value="outras_despesas">Outras Despesas</option>
-                            </optgroup>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="valor">Valor (R$):</label>
-                        <input type="number" id="valor" step="0.01" min="0" placeholder="0,00" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tipo">Tipo:</label>
-                        <select id="tipo" required>
-                            <option value="receita">Receita</option>
-                            <option value="despesa">Despesa</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label style="opacity: 0;">Ação</label>
-                        <button type="submit" class="btn-adicionar">Adicionar Transação</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        
-        <div class="panel">
-            <h2>Filtros e Pesquisa</h2>
-            <div class="filtros">
-                <div class="form-group">
-                    <label for="filtro-data">Data:</label>
-                    <input type="date" id="filtro-data">
-                </div>
-                
-                <div class="form-group">
-                    <label for="filtro-mes">Mês:</label>
-                    <select id="filtro-mes">
-                        <option value="">Todos os meses</option>
-                        <option value="1">Janeiro</option>
-                        <option value="2">Fevereiro</option>
-                        <option value="3">Março</option>
-                        <option value="4">Abril</option>
-                        <option value="5">Maio</option>
-                        <option value="6">Junho</option>
-                        <option value="7">Julho</option>
-                        <option value="8">Agosto</option>
-                        <option value="9">Setembro</option>
-                        <option value="10">Outubro</option>
-                        <option value="11">Novembro</option>
-                        <option value="12">Dezembro</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="filtro-categoria">Categoria:</label>
-                    <select id="filtro-categoria">
-                        <option value="">Todas as categorias</option>
-                        <optgroup label="Receitas">
-                            <option value="vendas">Vendas</option>
-                            <option value="servicos">Serviços</option>
-                            <option value="outras_receitas">Outras Receitas</option>
-                        </optgroup>
-                        <optgroup label="Despesas">
-                            <option value="fornecedores">Fornecedores</option>
-                            <option value="funcionarios">Funcionários</option>
-                            <option value="impostos">Impostos</option>
-                            <option value="manutencao">Manutenção</option>
-                            <option value="outras_despesas">Outras Despesas</option>
-                        </optgroup>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="filtro-tipo">Tipo:</label>
-                    <select id="filtro-tipo">
-                        <option value="">Todos os tipos</option>
-                        <option value="receita">Receita</option>
-                        <option value="despesa">Despesa</option>
-                    </select>
-                </div>
-            </div>
-            
-            <h2>Extrato de Transações</h2>
-            <table id="tabela-transacoes">
-                <thead>
-                    <tr>
-                        <th>Data</th>
-                        <th>Descrição</th>
-                        <th>Categoria</th>
-                        <th>Valor</th>
-                        <th>Tipo</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="corpo-tabela"></tbody>
-            </table>
-            <div id="empty-state" class="empty-state">
-                <p>Nenhuma transação cadastrada. Adicione sua primeira transação usando o formulário acima.</p>
-            </div>
-        </div>
-        
-        <div class="resumo-mensal">
-            <h2>Resumo Mensal</h2>
-            <div id="resumo-mensal-container"></div>
-        </div>
-        
-        <div class="acoes">
-            <button id="btn-limpar-tudo" class="btn-excluir">Limpar Todos os Dados</button>
-            <button id="btn-fechamento-diario" class="btn-fechamento">Fechamento Diário</button>
-            <button id="btn-fechamento-mensal" class="btn-fechamento">Fechamento Mensal</button>
-            <button id="btn-exportar-excel" class="btn-adicionar">Exportar para Excel</button>
-        </div>
+  <div class="container">
+    <header>
+      <h1>Planilha Financeira com Fechamento Diário e Mensal</h1>
+      <p class="description">Controle suas finanças com registros, filtros e relatórios exportáveis</p>
+    </header>
+
+    <div class="dashboard">
+      <div class="card receitas">
+        <h3>Total de Receitas</h3>
+        <div class="valor positivo" id="total-receitas">R$ 0,00</div>
+      </div>
+      <div class="card despesas">
+        <h3>Total de Despesas</h3>
+        <div class="valor negativo" id="total-despesas">R$ 0,00</div>
+      </div>
+      <div class="card saldo">
+        <h3>Saldo do Caixa</h3>
+        <div class="valor" id="saldo-caixa">R$ 0,00</div>
+      </div>
     </div>
 
-    <!-- SheetJS -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <div class="panel">
+      <h2>Registrar Nova Transação</h2>
+      <form id="form-transacao">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="data">Data</label>
+            <input type="date" id="data" required>
+          </div>
+          <div class="form-group">
+            <label for="descricao">Descrição</label>
+            <input type="text" id="descricao" placeholder="Ex: Venda de produtos" required>
+          </div>
+          <div class="form-group">
+            <label for="categoria">Categoria</label>
+            <select id="categoria" required>
+              <option value="">Selecione uma categoria</option>
+              <optgroup label="Receitas">
+                <option value="vendas">Vendas</option>
+                <option value="servicos">Serviços</option>
+                <option value="outras_receitas">Outras Receitas</option>
+              </optgroup>
+              <optgroup label="Despesas">
+                <option value="fornecedores">Fornecedores</option>
+                <option value="funcionarios">Funcionários</option>
+                <option value="impostos">Impostos</option>
+                <option value="manutencao">Manutenção</option>
+                <option value="outras_despesas">Outras Despesas</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="valor">Valor (R$)</label>
+            <input type="number" id="valor" step="0.01" min="0" placeholder="0,00" required>
+          </div>
+          <div>
+            <label for="tipo">Tipo</label>
+            <select id="tipo" required>
+              <option value="receita">Receita</option>
+              <option value="despesa">Despesa</option>
+            </select>
+          </div>
+          <div style="align-self:end;">
+            <button type="submit" class="btn-adicionar">Adicionar Transação</button>
+          </div>
+        </div>
+      </form>
+    </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            let transacoes = JSON.parse(localStorage.getItem('transacoesFinanceiras')) || [];
-            
-            const formTransacao = document.getElementById('form-transacao');
-            const corpoTabela = document.getElementById('corpo-tabela');
-            const emptyState = document.getElementById('empty-state');
-            const btnFechamentoDiario = document.getElementById('btn-fechamento-diario');
-            const btnFechamentoMensal = document.getElementById('btn-fechamento-mensal');
-            const btnLimparTudo = document.getElementById('btn-limpar-tudo');
-            const btnExportarExcel = document.getElementById('btn-exportar-excel');
-            const resumoMensalContainer = document.getElementById('resumo-mensal-container');
-            
-            const filtroData = document.getElementById('filtro-data');
-            const filtroMes = document.getElementById('filtro-mes');
-            const filtroCategoria = document.getElementById('filtro-categoria');
-            const filtroTipo = document.getElementById('filtro-tipo');
-            
-            const totalReceitas = document.getElementById('total-receitas');
-            const totalDespesas = document.getElementById('total-despesas');
-            const saldoCaixa = document.getElementById('saldo-caixa');
-            const receitasHoje = document.getElementById('receitas-hoje');
-            const despesasHoje = document.getElementById('despesas-hoje');
-            const saldoDiario = document.getElementById('saldo-diario');
-            
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('data').value = hoje;
-            filtroData.value = hoje;
-            
-            atualizarTabela();
-            atualizarDashboard();
-            atualizarResumoMensal();
-            
-            formTransacao.addEventListener('submit', function(e) {
-                e.preventDefault();
-                adicionarTransacao();
-            });
-            
-            filtroData.addEventListener('change', atualizarTabela);
-            filtroMes.addEventListener('change', atualizarTabela);
-            filtroCategoria.addEventListener('change', atualizarTabela);
-            filtroTipo.addEventListener('change', atualizarTabela);
-            
-            btnFechamentoDiario.addEventListener('click', realizarFechamentoDiario);
-            btnFechamentoMensal.addEventListener('click', realizarFechamentoMensal);
-            btnLimparTudo.addEventListener('click', limparTodosDados);
-            btnExportarExcel.addEventListener('click', exportarParaExcel);
-            
-            function adicionarTransacao() {
-                const data = document.getElementById('data').value;
-                const descricao = document.getElementById('descricao').value;
-                const categoria = document.getElementById('categoria').value;
-                const valor = parseFloat(document.getElementById('valor').value);
-                const tipo = document.getElementById('tipo').value;
-                
-                const transacao = { id: Date.now(), data, descricao, categoria, valor, tipo };
-                transacoes.push(transacao);
-                salvarNoLocalStorage();
-                formTransacao.reset();
-                document.getElementById('data').value = hoje;
-                
-                atualizarTabela();
-                atualizarDashboard();
-                atualizarResumoMensal();
-            }
-            
-            function excluirTransacao(id) {
-                if (confirm('Tem certeza que deseja excluir esta transação?')) {
-                    transacoes = transacoes.filter(transacao => transacao.id !== id);
-                    salvarNoLocalStorage();
-                    atualizarTabela();
-                    atualizarDashboard();
-                    atualizarResumoMensal();
-                }
-            }
-            
-            function atualizarTabela() {
-                corpoTabela.innerHTML = '';
-                let transacoesFiltradas = transacoes;
-                
-                if (filtroData.value) {
-                    transacoesFiltradas = transacoesFiltradas.filter(t => t.data === filtroData.value);
-                }
-                
-                if (filtroMes.value) {
-                    transacoesFiltradas = transacoesFiltradas.filter(t => {
-                        const [ano, mes] = t.data.split('-');
-                        return parseInt(mes) === parseInt(filtroMes.value);
-                    });
-                }
-                
-                if (filtroCategoria.value) {
-                    transacoesFiltradas = transacoesFiltradas.filter(t => t.categoria === filtroCategoria.value);
-                }
-                
-                if (filtroTipo.value) {
-                    transacoesFiltradas = transacoesFiltradas.filter(t => t.tipo === filtroTipo.value);
-                }
-                
-                if (transacoesFiltradas.length === 0) {
-                    emptyState.style.display = 'block';
-                    return;
-                } else {
-                    emptyState.style.display = 'none';
-                }
-                
-                transacoesFiltradas.forEach(transacao => {
-                    const tr = document.createElement('tr');
-                    
-                    const [ano, mes, dia] = transacao.data.split('-');
-                    const dataFormatada = `${dia}/${mes}/${ano}`;
-                    
-                    tr.innerHTML = `
-                        <td>${dataFormatada}</td>
-                        <td>${transacao.descricao}</td>
-                        <td>${formatarCategoria(transacao.categoria)}</td>
-                        <td>R$ ${transacao.valor.toFixed(2).replace('.', ',')}</td>
-                        <td class="${transacao.tipo === 'receita' ? 'positivo' : 'negativo'}">
-                            ${transacao.tipo === 'receita' ? 'Receita' : 'Despesa'}
-                        </td>
-                        <td><button class="btn-excluir" onclick="excluirTransacao(${transacao.id})">Excluir</button></td>
-                    `;
-                    
-                    corpoTabela.appendChild(tr);
-                });
-            }
-            
-            function atualizarDashboard() {
-                let receitasTotal = 0, despesasTotal = 0;
-                let receitasDia = 0, despesasDia = 0;
-                
-                transacoes.forEach(t => {
-                    if (t.tipo === 'receita') receitasTotal += t.valor;
-                    else despesasTotal += t.valor;
-                    
-                    if (t.data === hoje) {
-                        if (t.tipo === 'receita') receitasDia += t.valor;
-                        else despesasDia += t.valor;
-                    }
-                });
-                
-                const saldo = receitasTotal - despesasTotal;
-                const saldoDia = receitasDia - despesasDia;
-                
-                totalReceitas.textContent = `R$ ${receitasTotal.toFixed(2).replace('.', ',')}`;
-                totalDespesas.textContent = `R$ ${despesasTotal.toFixed(2).replace('.', ',')}`;
-                saldoCaixa.textContent = `R$ ${saldo.toFixed(2).replace('.', ',')}`;
-                saldoCaixa.className = 'valor ' + (saldo >= 0 ? 'positivo' : 'negativo');
-                
-                receitasHoje.textContent = `R$ ${receitasDia.toFixed(2).replace('.', ',')}`;
-                despesasHoje.textContent = `R$ ${despesasDia.toFixed(2).replace('.', ',')}`;
-                saldoDiario.textContent = `R$ ${saldoDia.toFixed(2).replace('.', ',')}`;
-                saldoDiario.className = saldoDia >= 0 ? 'positivo' : 'negativo';
-            }
-            
-            function atualizarResumoMensal() {
-                const resumo = {};
-                
-                transacoes.forEach(t => {
-                    const [ano, mes] = t.data.split('-');
-                    const chave = `${ano}-${mes}`;
-                    
-                    if (!resumo[chave]) resumo[chave] = { receitas: 0, despesas: 0 };
-                    
-                    if (t.tipo === 'receita') resumo[chave].receitas += t.valor;
-                    else resumo[chave].despesas += t.valor;
-                });
-                
-                resumoMensalContainer.innerHTML = '';
-                
-                Object.keys(resumo).sort().forEach(mes => {
-                    const { receitas, despesas } = resumo[mes];
-                    const saldo = receitas - despesas;
-                    
-                    const div = document.createElement('div');
-                    div.className = 'card';
-                    div.innerHTML = `
-                        <h3>${formatarMes(mes)}</h3>
-                        <p class="positivo">Receitas: R$ ${receitas.toFixed(2).replace('.', ',')}</p>
-                        <p class="negativo">Despesas: R$ ${despesas.toFixed(2).replace('.', ',')}</p>
-                        <p><strong>Saldo: <span class="${saldo >= 0 ? 'positivo' : 'negativo'}">
-                            R$ ${saldo.toFixed(2).replace('.', ',')}</span></strong></p>
-                    `;
-                    resumoMensalContainer.appendChild(div);
-                });
-            }
-            
-            function realizarFechamentoDiario() {
-                const dataSelecionada = filtroData.value || hoje;
-                let receitasDia = 0, despesasDia = 0;
-                
-                transacoes.forEach(t => {
-                    if (t.data === dataSelecionada) {
-                        if (t.tipo === 'receita') receitasDia += t.valor;
-                        else despesasDia += t.valor;
-                    }
-                });
-                
-                const saldoDia = receitasDia - despesasDia;
-                alert(`Fechamento do dia ${formatarData(dataSelecionada)}:\nReceitas: R$ ${receitasDia.toFixed(2).replace('.', ',')}\nDespesas: R$ ${despesasDia.toFixed(2).replace('.', ',')}\nSaldo: R$ ${saldoDia.toFixed(2).replace('.', ',')}`);
-            }
-            
-            function realizarFechamentoMensal() {
-                const mesSelecionado = filtroMes.value;
-                const ano = new Date().getFullYear();
-                
-                if (!mesSelecionado) {
-                    alert('Selecione um mês para realizar o fechamento mensal.');
-                    return;
-                }
-                
-                let receitasMes = 0, despesasMes = 0;
-                
-                transacoes.forEach(t => {
-                    const [anoTransacao, mesTransacao] = t.data.split('-');
-                    if (parseInt(mesTransacao) === parseInt(mesSelecionado) && parseInt(anoTransacao) === ano) {
-                        if (t.tipo === 'receita') receitasMes += t.valor;
-                        else despesasMes += t.valor;
-                    }
-                });
-                
-                const saldoMes = receitasMes - despesasMes;
-                alert(`Fechamento do mês ${formatarMes(`${ano}-${mesSelecionado}`)}:\nReceitas: R$ ${receitasMes.toFixed(2).replace('.', ',')}\nDespesas: R$ ${despesasMes.toFixed(2).replace('.', ',')}\nSaldo: R$ ${saldoMes.toFixed(2).replace('.', ',')}`);
-            }
-            
-            function limparTodosDados() {
-                if (confirm('Tem certeza que deseja limpar todos os dados? Esta ação não pode ser desfeita.')) {
-                    transacoes = [];
-                    salvarNoLocalStorage();
-                    atualizarTabela();
-                    atualizarDashboard();
-                    atualizarResumoMensal();
-                }
-            }
-            
-            function exportarParaExcel() {
-                if (transacoes.length === 0) {
-                    alert('Não há transações para exportar.');
-                    return;
-                }
+    <div class="panel">
+      <h2>Filtros e Extrato</h2>
+      <div class="filtros">
+        <div>
+          <label for="filtro-data">Data</label>
+          <input type="date" id="filtro-data">
+        </div>
+        <div>
+          <label for="filtro-mes">Mês</label>
+          <select id="filtro-mes">
+            <option value="">Todos os meses</option>
+            <option value="1">Janeiro</option>
+            <option value="2">Fevereiro</option>
+            <option value="3">Março</option>
+            <option value="4">Abril</option>
+            <option value="5">Maio</option>
+            <option value="6">Junho</option>
+            <option value="7">Julho</option>
+            <option value="8">Agosto</option>
+            <option value="9">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+        </div>
+        <div>
+          <label for="filtro-categoria">Categoria</label>
+          <select id="filtro-categoria">
+            <option value="">Todas as categorias</option>
+            <optgroup label="Receitas">
+              <option value="vendas">Vendas</option>
+              <option value="servicos">Serviços</option>
+              <option value="outras_receitas">Outras Receitas</option>
+            </optgroup>
+            <optgroup label="Despesas">
+              <option value="fornecedores">Fornecedores</option>
+              <option value="funcionarios">Funcionários</option>
+              <option value="impostos">Impostos</option>
+              <option value="manutencao">Manutenção</option>
+              <option value="outras_despesas">Outras Despesas</option>
+            </optgroup>
+          </select>
+        </div>
+        <div>
+          <label for="filtro-tipo">Tipo</label>
+          <select id="filtro-tipo">
+            <option value="">Todos os tipos</option>
+            <option value="receita">Receita</option>
+            <option value="despesa">Despesa</option>
+          </select>
+        </div>
+      </div>
 
-                const dados = transacoes.map(t => {
-                    const [ano, mes, dia] = t.data.split('-');
-                    const dataFormatada = `${dia}/${mes}/${ano}`;
-                    return {
-                        Data: dataFormatada,
-                        Descrição: t.descricao,
-                        Categoria: formatarCategoria(t.categoria),
-                        Valor: t.valor,
-                        Tipo: t.tipo === 'receita' ? 'Receita' : 'Despesa'
-                    };
-                });
+      <h2>Extrato de Transações</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th><th>Tipo</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpo-tabela"></tbody>
+      </table>
+      <div id="empty-state" class="empty-state">Nenhuma transação cadastrada. Adicione transações usando o formulário acima.</div>
+    </div>
 
-                const worksheet = XLSX.utils.json_to_sheet(dados);
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Transações");
-                XLSX.writeFile(workbook, "planilha_financeira.xlsx");
-            }
-            
-            function salvarNoLocalStorage() {
-                localStorage.setItem('transacoesFinanceiras', JSON.stringify(transacoes));
-            }
-            
-            function formatarCategoria(categoria) {
-                const categorias = {
-                    vendas: 'Vendas',
-                    servicos: 'Serviços',
-                    outras_receitas: 'Outras Receitas',
-                    fornecedores: 'Fornecedores',
-                    funcionarios: 'Funcionários',
-                    impostos: 'Impostos',
-                    manutencao: 'Manutenção',
-                    outras_despesas: 'Outras Despesas'
-                };
-                return categorias[categoria] || categoria;
-            }
-            
-            function formatarMes(anoMes) {
-                const [ano, mes] = anoMes.split('-');
-                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-                return `${meses[parseInt(mes) - 1]} de ${ano}`;
-            }
-            
-            function formatarData(data) {
-                const [ano, mes, dia] = data.split('-');
-                return `${dia}/${mes}/${ano}`;
-            }
-            
-            // Expor função excluirTransacao globalmente
-            window.excluirTransacao = excluirTransacao;
+    <div class="resumo-mensal">
+      <h2>Resumo Mensal</h2>
+      <table>
+        <thead>
+          <tr><th>Mês/Ano</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr>
+        </thead>
+        <tbody id="corpo-resumo-mensal"></tbody>
+      </table>
+    </div>
+
+    <div class="acoes">
+      <button class="btn-fechamento" onclick="fechamentoDiarioXLSX()">Fechamento Diário (Excel)</button>
+      <button class="btn-fechamento" onclick="fechamentoMensalXLSX()">Fechamento Mensal (Excel)</button>
+      <button class="btn-fechamento" onclick="fechamentoDiarioPDF()">Fechamento Diário (PDF)</button>
+      <button class="btn-fechamento" onclick="fechamentoMensalPDF()">Fechamento Mensal (PDF)</button>
+      <button class="btn-fechamento" id="btn-limpar-tudo">Limpar Todos os Dados</button>
+    </div>
+  </div>
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    let transacoes = JSON.parse(localStorage.getItem('transacoesFinanceiras')) || [];
+
+    const form = document.getElementById('form-transacao');
+    const corpoTabela = document.getElementById('corpo-tabela');
+    const emptyState = document.getElementById('empty-state');
+    const filtroData = document.getElementById('filtro-data');
+    const filtroMes = document.getElementById('filtro-mes');
+    const filtroCategoria = document.getElementById('filtro-categoria');
+    const filtroTipo = document.getElementById('filtro-tipo');
+    const totalReceitas = document.getElementById('total-receitas');
+    const totalDespesas = document.getElementById('total-despesas');
+    const saldoCaixa = document.getElementById('saldo-caixa');
+    const corpoResumoMensal = document.getElementById('corpo-resumo-mensal');
+    const btnLimpar = document.getElementById('btn-limpar-tudo');
+
+    function getHoje() {
+      const hoje = new Date();
+      hoje.setMinutes(hoje.getMinutes() - hoje.getTimezoneOffset());
+      return hoje.toISOString().split('T')[0];
+    }
+    const hoje = getHoje();
+    document.getElementById('data').value = hoje;
+    filtroData.value = hoje;
+
+    // ---- utilidades ----
+    function salvarNoLocalStorage() { localStorage.setItem('transacoesFinanceiras', JSON.stringify(transacoes)); }
+    function formatarCategoria(cat) {
+      const mapa = { vendas:'Vendas', servicos:'Serviços', outras_receitas:'Outras Receitas', fornecedores:'Fornecedores', funcionarios:'Funcionários', impostos:'Impostos', manutencao:'Manutenção', outras_despesas:'Outras Despesas' };
+      return mapa[cat] || cat;
+    }
+
+    function aplicarFiltros(lista = transacoes) {
+      let filtrada = lista;
+      if (filtroData.value) filtrada = filtrada.filter(t => t.data === filtroData.value);
+      if (filtroMes.value) filtrada = filtrada.filter(t => parseInt(t.data.split('-')[1]) === parseInt(filtroMes.value));
+      if (filtroCategoria.value) filtrada = filtrada.filter(t => t.categoria === filtroCategoria.value);
+      if (filtroTipo.value) filtrada = filtrada.filter(t => t.tipo === filtroTipo.value);
+      return filtrada;
+    }
+
+    function atualizarTabela() {
+      corpoTabela.innerHTML = '';
+      const lista = aplicarFiltros();
+      if (lista.length === 0) {
+        emptyState.style.display = 'block';
+      } else {
+        emptyState.style.display = 'none';
+        lista.forEach(t => {
+          const [ano, mes, dia] = t.data.split('-');
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${dia}/${mes}/${ano}</td>
+            <td>${t.descricao}</td>
+            <td>${formatarCategoria(t.categoria)}</td>
+            <td>R$ ${t.valor.toFixed(2).replace('.', ',')}</td>
+            <td class="${t.tipo==='receita'?'positivo':'negativo'}">${t.tipo==='receita'?'Receita':'Despesa'}</td>
+            <td><button class="btn-excluir" onclick="excluirTransacao(${t.id})">Excluir</button></td>
+          `;
+          corpoTabela.appendChild(tr);
         });
-    </script>
+      }
+      atualizarDashboard(lista);
+      atualizarResumoMensal();
+    }
+
+    function atualizarDashboard(lista = transacoes) {
+      let receitas = 0, despesas = 0;
+      lista.forEach(t => t.tipo === 'receita' ? receitas += t.valor : despesas += t.valor);
+      const saldo = receitas - despesas;
+      totalReceitas.textContent = `R$ ${receitas.toFixed(2).replace('.', ',')}`;
+      totalDespesas.textContent = `R$ ${despesas.toFixed(2).replace('.', ',')}`;
+      saldoCaixa.textContent = `R$ ${saldo.toFixed(2).replace('.', ',')}`;
+      saldoCaixa.className = 'valor ' + (saldo >= 0 ? 'positivo' : 'negativo');
+    }
+
+    function atualizarResumoMensal() {
+      const resumo = {};
+      transacoes.forEach(t => {
+        const [ano, mes] = t.data.split('-');
+        const chave = `${mes}/${ano}`;
+        if (!resumo[chave]) resumo[chave] = { receitas: 0, despesas: 0 };
+        if (t.tipo === 'receita') resumo[chave].receitas += t.valor;
+        else resumo[chave].despesas += t.valor;
+      });
+      corpoResumoMensal.innerHTML = '';
+      Object.keys(resumo).sort().forEach(mesAno => {
+        const { receitas, despesas } = resumo[mesAno];
+        const saldo = receitas - despesas;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${mesAno}</td>
+          <td class="positivo">R$ ${receitas.toFixed(2).replace('.', ',')}</td>
+          <td class="negativo">R$ ${despesas.toFixed(2).replace('.', ',')}</td>
+          <td class="${saldo>=0?'positivo':'negativo'}">R$ ${saldo.toFixed(2).replace('.', ',')}</td>
+        `;
+        corpoResumoMensal.appendChild(tr);
+      });
+    }
+
+    window.excluirTransacao = id => {
+      if (!confirm('Tem certeza que deseja excluir essa transação?')) return;
+      transacoes = transacoes.filter(t => t.id !== id);
+      salvarNoLocalStorage();
+      atualizarTabela();
+    };
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const nova = {
+        id: Date.now(),
+        data: document.getElementById('data').value,
+        descricao: document.getElementById('descricao').value,
+        categoria: document.getElementById('categoria').value,
+        valor: parseFloat(document.getElementById('valor').value) || 0,
+        tipo: document.getElementById('tipo').value
+      };
+      transacoes.push(nova);
+      salvarNoLocalStorage();
+      form.reset();
+      document.getElementById('data').value = hoje;
+      atualizarTabela();
+    });
+
+    filtroData.addEventListener('change', atualizarTabela);
+    filtroMes.addEventListener('change', atualizarTabela);
+    filtroCategoria.addEventListener('change', atualizarTabela);
+    filtroTipo.addEventListener('change', atualizarTabela);
+    btnLimpar.addEventListener('click', () => {
+      if (!confirm('Tem certeza que deseja limpar todos os dados?')) return;
+      transacoes = [];
+      salvarNoLocalStorage();
+      atualizarTabela();
+    });
+
+    // -------- Export XLSX --------
+    function exportarXLSX(nome, lista) {
+      if (!lista || lista.length === 0) { alert('Nenhuma transação encontrada!'); return; }
+      const dados = lista.map(t => ({ Data: t.data.split('-').reverse().join('/'), Descricao: t.descricao, Categoria: formatarCategoria(t.categoria), Valor: t.valor, Tipo: t.tipo === 'receita' ? 'Receita' : 'Despesa' }));
+      const receitas = lista.filter(t => t.tipo === 'receita').reduce((s, t) => s + t.valor, 0);
+      const despesas = lista.filter(t => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0);
+      dados.push({}, { Descricao: 'TOTAL RECEITAS', Valor: receitas }, { Descricao: 'TOTAL DESPESAS', Valor: despesas }, { Descricao: 'SALDO', Valor: receitas - despesas });
+      const ws = XLSX.utils.json_to_sheet(dados);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Fechamento');
+      XLSX.writeFile(wb, nome + '.xlsx');
+    }
+
+    // -------- Export PDF --------
+    async function exportarPDF(nome, lista) {
+      if (!lista || lista.length === 0) { alert('Nenhuma transação encontrada!'); return; }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt' });
+      doc.setFontSize(14);
+      doc.text('Relatório Financeiro - ' + nome, 40, 40);
+      const dadosTabela = lista.map(t => [t.data.split('-').reverse().join('/'), t.descricao, formatarCategoria(t.categoria), 'R$ ' + t.valor.toFixed(2).replace('.', ','), t.tipo === 'receita' ? 'Receita' : 'Despesa']);
+      const receitas = lista.filter(t => t.tipo === 'receita').reduce((s, t) => s + t.valor, 0);
+      const despesas = lista.filter(t => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0);
+      const saldo = receitas - despesas;
+      doc.autoTable({ head: [['Data', 'Descrição', 'Categoria', 'Valor', 'Tipo']], body: dadosTabela, startY: 64, margin: { left: 40, right: 40 } });
+      const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 16 : 300;
+      doc.text(`Total Receitas: R$ ${receitas.toFixed(2).replace('.', ',')}`, 40, finalY);
+      doc.text(`Total Despesas: R$ ${despesas.toFixed(2).replace('.', ',')}`, 40, finalY + 16);
+      doc.text(`Saldo: R$ ${saldo.toFixed(2).replace('.', ',')}`, 40, finalY + 32);
+      doc.save(nome + '.pdf');
+    }
+
+    // -------- Public functions para botões --------
+    window.fechamentoDiarioXLSX = () => { const dataRef = filtroData.value || hoje; const lista = transacoes.filter(t => t.data === dataRef); exportarXLSX('Fechamento_Diario_' + dataRef, lista); };
+    window.fechamentoMensalXLSX = () => { const mesRef = filtroMes.value || (new Date().getMonth() + 1); const lista = transacoes.filter(t => parseInt(t.data.split('-')[1]) === parseInt(mesRef)); exportarXLSX('Fechamento_Mensal_' + mesRef, lista); };
+    window.fechamentoDiarioPDF = () => { const dataRef = filtroData.value || hoje; const lista = transacoes.filter(t => t.data === dataRef); exportarPDF('Fechamento_Diario_' + dataRef, lista); };
+    window.fechamentoMensalPDF = () => { const mesRef = filtroMes.value || (new Date().getMonth() + 1); const lista = transacoes.filter(t => parseInt(t.data.split('-')[1]) === parseInt(mesRef)); exportarPDF('Fechamento_Mensal_' + mesRef, lista); };
+
+    // expose atualizarTabela for inline uses (if any)
+    window.atualizarTabela = atualizarTabela;
+
+    // inicializa
+    atualizarTabela();
+  });
+  </script>
 </body>
 </html>
